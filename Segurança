@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gerador de Senhas Rosa</title>
+  <style>
+    body {
+      background-color: #0d1117;
+      color: #c9d1d9;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      background-color: #161b22;
+      padding: 30px;
+      border-radius: 12px;
+      max-width: 400px;
+      margin: auto;
+      box-shadow: 0 0 15px rgba(255, 20, 147, 0.3);
+    }
+
+    h1 {
+      color: #ff69b4;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .parametro-senha {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .parametro-senha__texto {
+      font-size: 20px;
+      color: #ff1493;
+    }
+
+    .parametro-senha__botao {
+      background-color: #ff1493;
+      color: #0d1117;
+      border: none;
+      font-weight: bold;
+      font-size: 18px;
+      padding: 5px 10px;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.3s;
+    }
+
+    .parametro-senha__botao:hover {
+      background-color: #ff69b4;
+    }
+
+    .checkbox {
+      margin: 10px 0;
+    }
+
+    label {
+      display: block;
+      margin: 6px 0;
+      font-size: 16px;
+    }
+
+    #campo-senha {
+      width: 100%;
+      font-size: 18px;
+      padding: 10px;
+      background-color: #0d1117;
+      color: #ff1493;
+      border: 1px solid #ff1493;
+      border-radius: 8px;
+      margin-top: 15px;
+    }
+
+    .forca {
+      margin-top: 10px;
+      padding: 8px;
+      border-radius: 6px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .forca.fraca {
+      background-color: #ff4c4c;
+      color: #fff;
+    }
+
+    .forca.media {
+      background-color: #ffa500;
+      color: #000;
+    }
+
+    .forca.forte {
+      background-color: #ff1493;
+      color: #0d1117;
+    }
+
+    .entropia {
+      margin-top: 12px;
+      text-align: center;
+      font-size: 14px;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Gerador de Senhas</h1>
+    <div class="parametro-senha">
+      <button class="parametro-senha__botao">-</button>
+      <span class="parametro-senha__texto">12</span>
+      <button class="parametro-senha__botao">+</button>
+    </div>
+
+    <label><input type="checkbox" class="checkbox" checked /> Letras Maiúsculas</label>
+    <label><input type="checkbox" class="checkbox" checked /> Letras Minúsculas</label>
+    <label><input type="checkbox" class="checkbox" checked /> Números</label>
+    <label><input type="checkbox" class="checkbox" checked /> Símbolos</label>
+
+    <input type="text" id="campo-senha" readonly />
+
+    <div class="forca"></div>
+    <div class="entropia"></div>
+  </div>
+
+  <script>
+    const numeroSenha = document.querySelector('.parametro-senha__texto');
+    let tamanhoSenha = 12;
+    numeroSenha.textContent = tamanhoSenha;
+    const letrasMaiusculas = 'ABCDEFGHIJKLMNOPQRSTUVXYWZ';
+    const letrasMinusculas = 'abcdefghijklmnopqrstuvxywz';
+    const numeros = '0123456789';
+    const simbolos = '!@%*?+$';
+    const botoes = document.querySelectorAll('.parametro-senha__botao');
+    const campoSenha = document.querySelector('#campo-senha');
+    const checkbox = document.querySelectorAll('.checkbox');
+    const forcaSenha = document.querySelector('.forca');
+
+    botoes[0].onclick = diminuiTamanho;
+    botoes[1].onclick = aumentaTamanho;
+
+    function diminuiTamanho() {
+      if (tamanhoSenha > 1) {
+        tamanhoSenha--;
+      }
+      numeroSenha.textContent = tamanhoSenha;
+      geraSenha();
+    }
+    function aumentaTamanho() {
+      if (tamanhoSenha < 20) {
+        tamanhoSenha++;
+      }
+      numeroSenha.textContent = tamanhoSenha;
+      geraSenha();
+    }
+
+    for (let i = 0; i < checkbox.length; i++) {
+      checkbox[i].onclick = geraSenha;
+    }
+
+    geraSenha();
+
+    function geraSenha() {
+      let alfabeto = '';
+      if (checkbox[0].checked) alfabeto += letrasMaiusculas;
+      if (checkbox[1].checked) alfabeto += letrasMinusculas;
+      if (checkbox[2].checked) alfabeto += numeros;
+      if (checkbox[3].checked) alfabeto += simbolos;
+
+      let senha = '';
+      for (let i = 0; i < tamanhoSenha; i++) {
+        let numeroAleatorio = Math.floor(Math.random() * alfabeto.length);
+        senha += alfabeto[numeroAleatorio];
+      }
+      campoSenha.value = senha;
+      classificaSenha(alfabeto.length);
+    }
+
+    function classificaSenha(tamanhoAlfabeto) {
+      let entropia = tamanhoSenha * Math.log2(tamanhoAlfabeto);
+      forcaSenha.classList.remove('fraca', 'media', 'forte');
+      if (entropia > 57) {
+        forcaSenha.classList.add('forte');
+      } else if (entropia > 35) {
+        forcaSenha.classList.add('media');
+      } else {
+        forcaSenha.classList.add('fraca');
+      }
+      const valorEntropia = document.querySelector('.entropia');
+      valorEntropia.textContent =
+        "Um computador pode levar até " +
+        Math.floor((2 ** entropia) / (100e6 * 60 * 60 * 24)) +
+        " dias para descobrir essa senha.";
+    }
+  </script>
+</body>
+</html>
